@@ -6,3 +6,4 @@
   username: AZURE_WA_USERNAME
   password: AZURE_WA_PASSWORD
   site: AZURE_WA_SITE
+  language: node_js
