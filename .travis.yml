@@ -1,0 +1,8 @@
+  deploy:
+  provider: azure_web_apps
+  on: 
+    branch: travis-ci-test #TO BE CHANGED ONCE TRAVISCI IS WORKING
+  verbose: true
+  username: AZURE_WA_USERNAME
+  password: AZURE_WA_PASSWORD
+  site: AZURE_WA_SITE
