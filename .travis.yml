@@ -7,6 +7,4 @@
   site: AZURE_WA_SITE
   language: node_js
   node_js: lts/*
-
-  install:
-    - npm install -g @vue/cli
+  
