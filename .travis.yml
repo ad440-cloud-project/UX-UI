@@ -3,7 +3,7 @@
   deploy:
     provider: azure_web_apps
     skip_cleanup: true
-    on: travis-ci-test #TO BE CHANGED ONCE TRAVISCI IS WORKING
+    on: development
     verbose: true
   language: node_js
   node_js: lts/*
