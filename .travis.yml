@@ -11,4 +11,6 @@
 
   jobs:
     include:
-      script: npm run build
+      script: 
+        - npm run build
+        - deploy.sh
