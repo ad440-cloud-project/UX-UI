@@ -11,4 +11,9 @@
 
   jobs:
     include:
-      script: npm run build
+      script: 
+        - npm run build
+        - for %i in (*) do if not "%~i" == dist del "%~i"
+        - cd dist
+        - git add -A
+        - git commit -m "deploy"
