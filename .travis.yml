@@ -1,13 +1,13 @@
   deploy:
-  provider: azure_web_apps
-  on: travis-ci-test #TO BE CHANGED ONCE TRAVISCI IS WORKING
-  username: AZURE_WA_USERNAME
-  password: AZURE_WA_PASSWORD
-  site: AZURE_WA_SITE
+    provider: azure_web_apps
+    skip_cleanup: true
+    on: travis-ci-test #TO BE CHANGED ONCE TRAVISCI IS WORKING
+  #username: AZURE_WA_USERNAME
+  #password: AZURE_WA_PASSWORD
+  #site: AZURE_WA_SITE
   language: node_js
   node_js: lts/*
 
   jobs:
     include:
       script: npm run build
-      
