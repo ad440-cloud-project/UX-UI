@@ -1,7 +1,9 @@
   after_success:
     - npm run build
   before_deploy:
+    - ls
     - cd dist
+    - ls
   
   deploy:
     provider: azure_web_apps
