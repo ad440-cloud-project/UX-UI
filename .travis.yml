@@ -1,7 +1,10 @@
-  before_deploy: cd dist
+    after_success:
+    - npm run build
+  before_deploy:
+    - cd dist
+  
   deploy:
     provider: azure_web_apps
-    local_dir: dist
     skip_cleanup: true
     on: travis-ci-test #TO BE CHANGED ONCE TRAVISCI IS WORKING
     verbose: true
@@ -11,7 +14,7 @@
   language: node_js
   node_js: lts/*
 
-  jobs:
-    include:
-      script: 
-        - npm run build
+  #jobs:
+   # include:
+    #  script: 
+     #   - npm run build
