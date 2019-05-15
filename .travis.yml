@@ -11,10 +11,4 @@
 
   jobs:
     include:
-      script: 
-        - npm run build
-        - git remote add azure https://ad440deploy@ad440-web-app.scm.azurewebsites.net:443/ad440-web-app.git
-        - cd dist
-        - git add -A
-        - git commit -m "deploy"
-        - git push azure master
+      script: npm run build
