@@ -11,5 +11,5 @@
   jobs:
     include:
       script: 
-        - npm install
+        - npm install -g @vue/cli
         - npm run build
