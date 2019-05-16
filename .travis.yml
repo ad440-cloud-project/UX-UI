@@ -1,0 +1,14 @@
+  before_deploy: 
+    - cd dist
+  deploy:
+    provider: azure_web_apps
+    skip_cleanup: true
+    on: development
+    verbose: true
+  language: node_js
+  node_js: lts/*
+
+  jobs:
+    include:
+      script: 
+        - npm run build
