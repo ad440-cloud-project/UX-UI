@@ -64,12 +64,13 @@
     },
     beforeMount() {
     axios
-      .get(process.env.SAS_TOKEN_API)
+      .get(process.env[SAS_TOKEN_API])
       .then(response => {
         this.$session.set("sasToken", response.data.token);
       })
       .catch(error => (this.info = "sas "+error));
       console.log("Response: " + this.$session.get('sasToken'));
+      console.log("")
   },
     computed: {
       isInitial() {
