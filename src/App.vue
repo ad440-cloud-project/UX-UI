@@ -66,7 +66,7 @@
     axios
       .get(process.env.VUE_APP_SAS_API)
       .then(response => {
-        this.$session.set("sasToken", response.data);
+        this.$session.set("sasToken", response.data.token);
       })
       .catch(error => (this.info = "sas "+error));
       console.log("Response: " + this.$session.get('sasToken'));
