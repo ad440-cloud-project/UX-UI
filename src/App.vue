@@ -50,6 +50,7 @@
   import VueSession from 'vue-session';
   import Vue from 'vue';
   Vue.use(VueSession);
+  var SAS_TOKEN_API = process.env.SAS_TOKEN_API;
 
   const STATUS_INITIAL = 0, STATUS_SAVING = 1, STATUS_SUCCESS = 2, STATUS_FAILED = 3;
   export default {
@@ -64,7 +65,7 @@
     },
     beforeMount() {
     axios
-      .get(process.env['SAS_TOKEN_API'])
+      .get(SAS_TOKEN_API)
       .then(response => {
         this.$session.set("sasToken", response.data.token);
       })
