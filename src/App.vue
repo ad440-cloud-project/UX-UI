@@ -63,15 +63,14 @@
       }
     },
     beforeMount() {
-    var SAS_TOKEN_API = process.env.SAS_TOKEN_API;
     axios
-      .get(SAS_TOKEN_API)
+      .get(process.env.VUE_APP_SAS_API)
       .then(response => {
         this.$session.set("sasToken", response.data.token);
       })
       .catch(error => (this.info = "sas "+error));
       console.log("Response: " + this.$session.get('sasToken'));
-      console.log("")
+      console.log(SAS_TOKEN_API);
   },
     computed: {
       isInitial() {
