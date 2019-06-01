@@ -46,6 +46,11 @@
   import { upload } from './file-upload.fake.service'; // fake service
   // import { upload } from './file-upload.service';   // real service
   import { wait } from './utils';
+  import axios from 'axios';
+  import VueSession from 'vue-session';
+  import Vue from 'vue';
+  Vue.use(VueSession);
+
   const STATUS_INITIAL = 0, STATUS_SAVING = 1, STATUS_SUCCESS = 2, STATUS_FAILED = 3;
   export default {
     name: 'app',
@@ -57,6 +62,15 @@
         uploadFieldName: 'photos'
       }
     },
+    beforeMount() {
+    axios
+      .get(process.env.SAS_TOKEN_API)
+      .then(response => {
+        this.$session.set("sasToken", response.data.token);
+      })
+      .catch(error => (this.info = "sas "+error));
+      console.log("Response: " + this.$session.get('sasToken'));
+  },
     computed: {
       isInitial() {
         return this.currentStatus === STATUS_INITIAL;
