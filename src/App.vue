@@ -66,11 +66,10 @@
     axios
       .get(process.env.VUE_APP_SAS_API)
       .then(response => {
-        this.$session.set("sasToken", response.data.token);
+        this.$session.set("sasToken", response.data);
       })
       .catch(error => (this.info = "sas "+error));
       console.log("Response: " + this.$session.get('sasToken'));
-      console.log(SAS_TOKEN_API);
   },
     computed: {
       isInitial() {
