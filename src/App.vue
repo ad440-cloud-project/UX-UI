@@ -64,7 +64,7 @@
     },
     beforeMount() {
     axios
-      .get(process.env[SAS_TOKEN_API])
+      .get(process.env['SAS_TOKEN_API'])
       .then(response => {
         this.$session.set("sasToken", response.data.token);
       })
