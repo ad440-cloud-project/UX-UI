@@ -69,7 +69,6 @@
         this.$session.set("sasToken", response.data.token);
       })
       .catch(error => (this.info = "sas "+error));
-      console.log("Response: " + this.$session.get('sasToken'));
   },
     computed: {
       isInitial() {
