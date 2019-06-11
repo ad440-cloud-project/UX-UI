@@ -1,158 +1,168 @@
-<!-- HTML Template -->
 <template>
-  <div id="app">
-    <div class="container">
-      <!--UPLOAD-->
-      <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving">
-        <h1>Upload images - PIPELINE TEST</h1>
-        <div class="dropbox">
-          <input type="file" multiple :name="uploadFieldName" :disabled="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length"
-            accept="image/*" class="input-file">
-            <p v-if="isInitial">
-              Drag your file(s) here to begin<br> or click to browse
-            </p>
-            <p v-if="isSaving">
-              Uploading {{ fileCount }} files...
-            </p>
-        </div>
-      </form>
-      <!--SUCCESS-->
-      <div v-if="isSuccess">
-        <h2>Uploaded {{ uploadedFiles.length }} file(s) successfully.</h2>
-        <p>
-          <a href="javascript:void(0)" @click="reset()">Upload again</a>
-        </p>
-        <ul class="list-unstyled">
-          <li v-for="item in uploadedFiles">
-            <img :src="item.url" class="img-responsive img-thumbnail" :alt="item.originalName">
-          </li>
-        </ul>
-      </div>
-      <!--FAILED-->
-      <div v-if="isFailed">
-        <h2>Uploaded failed.</h2>
-        <p>
-          <a href="javascript:void(0)" @click="reset()">Try again</a>
-        </p>
-        <pre>{{ uploadError }}</pre>
-      </div>
+  <div id="file-drag-drop">
+    <form ref="fileform">Drop the files here!</form>
+    <div v-for="(file, key) in files" class="file-listing">
+      {{ file.name }}
     </div>
+    <a class="submit-button" v-on:click="submitFiles()" v-show="files.length > 0">Submit</a>
   </div>
 </template>
 
-<!--Javascript-->
 <script>
-  // swap as you need
-  import { upload } from './file-upload.fake.service'; // fake service
-  // import { upload } from './file-upload.service';   // real service
-  import { wait } from './utils';
+  //Imports for session and axios usage below
   import axios from 'axios';
   import VueSession from 'vue-session';
   import Vue from 'vue';
   Vue.use(VueSession);
 
-  const STATUS_INITIAL = 0, STATUS_SAVING = 1, STATUS_SUCCESS = 2, STATUS_FAILED = 3;
   export default {
-    name: 'app',
-    data() {
-      return {
-        uploadedFiles: [],
-        uploadError: null,
-        currentStatus: null,
-        uploadFieldName: 'photos'
+    //Local variable to store files
+    data(){
+        return{
+          files: [],
+        }
+      },
+
+    mounted(){
+      //Grab a SAS Token via the method that calls the API
+      this.getSasToken();
+
+      /*Listen to all of the drag events and bind an event listener to each
+      for the fileform. */
+      ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'].forEach( function( evt ) {
+      /* For each event add an event listener that prevents the default action
+        (opening the file in the browser) and stop the propagation of the event (so
+        no other elements open the file in the browser)*/
+      this.$refs.fileform.addEventListener(evt, function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        }.bind(this), false);
+        }.bind(this));
+      
+      //Add an event listener for drop to the form
+      this.$refs.fileform.addEventListener('drop', function(e){
+      
+      //Capture the files from the drop event and add them to our local files array.
+      for( let i = 0; i < e.dataTransfer.files.length; i++ ){
+        
+        //Check files for proper file type before pushing to files array
+        if(this.fileTypeValidation(e.dataTransfer.files[i]))
+          this.files.push( e.dataTransfer.files[i] );
+        else{
+          console.log(`${e.dataTransfer.files[i].name} is not a valid jpeg or png. File not added.`);
+        }
       }
+      }.bind(this));
     },
-    beforeMount() {
-    axios
-      .get(process.env.VUE_APP_SAS_API)
-      .then(response => {
-        this.$session.set("sasToken", response.data.token);
-      })
-      .catch(error => (this.info = "sas "+error));
-  },
-    computed: {
-      isInitial() {
-        return this.currentStatus === STATUS_INITIAL;
-      },
-      isSaving() {
-        return this.currentStatus === STATUS_SAVING;
-      },
-      isSuccess() {
-        return this.currentStatus === STATUS_SUCCESS;
-      },
-      isFailed() {
-        return this.currentStatus === STATUS_FAILED;
-      }
-    },
+
     methods: {
-      reset() {
-        // reset form to initial state
-        this.currentStatus = STATUS_INITIAL;
-        this.uploadedFiles = [];
-        this.uploadError = null;
+      //Method called when clicking the "submit" button.
+      //Main method for uploading files to Azure.
+      submitFiles(){
+          
+          let uri = this.$session.get('uri');
+          let sasToken = this.$session.get('sasToken');
+          
+          //Iterate through the files submitted and upload
+          while(this.files.length > 0){
+            //Setup variables - we pop here so that uploaded items disappear from the list
+            let file = this.files.pop();
+            let fileName = file.name;
+
+            //Upload file to Azure storage images container
+            console.log(`Uploading ${fileName}...`)
+            axios.put(uri + "/upload-" + this.getDate() + fileName + sasToken, file,
+            {
+              headers: {
+              'x-ms-blob-type': 'BlockBlob',
+              },
+            }).then(function(){
+              console.log('Success!');
+            }).catch(function(){
+              console.log('Failed!');
+            });
+          }
+        },
+
+      //Helper method to retrieve a UTC date and return in YYYYMMDDHHMMSS format
+      getDate(){
+        var date = new Date();
+
+        return(date.getFullYear().toString()+
+               pad2(date.getUTCMonth()+1)+
+               pad2(date.getUTCDate())+
+               pad2(date.getUTCHours())+
+               pad2(date.getUTCMinutes())+
+               pad2(date.getUTCSeconds()));
+        
+        //Since Date methods only return single digits, we sometimes need to add a 0
+        function pad2(n) {return (n < 10 ? '0' : '') + n;}
       },
-      save(formData) {
-        // upload data to the server
-        this.currentStatus = STATUS_SAVING;
-        upload(formData)
-          .then(wait(1500)) // DEV ONLY: wait for 1.5s 
-          .then(x => {
-            this.uploadedFiles = [].concat(x);
-            this.currentStatus = STATUS_SUCCESS;
+
+      //Checks submitted files for proper file types
+      fileTypeValidation(file){
+
+          //If a file is not of the allowed types, push filename to errorList
+          if (!file.type.match(/^(image\/jpg|image\/jpeg|image\/png)$/)){
+            return false;
+          }
+          else{
+            //Validation passes
+            return true;
+          }
+      },
+
+      //Retrieves an object from Azure containing the images container URI and a SAS Token.
+      //Stores object data in session variables.
+      getSasToken(){
+        axios
+          .get(process.env.VUE_APP_SAS_API)
+          .then(response => {
+          this.$session.set("sasToken", response.data.token);
+          this.$session.set("uri", response.data.uri);
           })
-          .catch(err => {
-            this.uploadError = err.response;
-            this.currentStatus = STATUS_FAILED;
-          });
-      },
-      filesChange(fieldName, fileList) {
-        // handle file changes
-        const formData = new FormData();
-        if (!fileList.length) return;
-        // append the files to FormData
-        Array
-          .from(Array(fileList.length).keys())
-          .map(x => {
-            formData.append(fieldName, fileList[x], fileList[x].name);
-          });
-        // save it
-        this.save(formData);
+          .catch(error => (this.info = "sas "+error));
+          console.log("Response: " + this.$session.get('sasToken'));
       }
-    },
-    mounted() {
-      this.reset();
-    },
+    }
   }
 </script>
 
-<!-- SASS styling -->
-<style lang="scss">
-  .dropbox {
-    outline: 2px dashed grey; /* the dash box */
-    outline-offset: -10px;
-    background: lightcyan;
-    color: dimgray;
-    padding: 10px 10px;
-    min-height: 200px; /* minimum height */
-    position: relative;
-    cursor: pointer;
-  }
-  
-  .input-file {
-    opacity: 0; /* invisible but it's there! */
-    width: 100%;
-    height: 200px;
-    position: absolute;
-    cursor: pointer;
-  }
-  
-  .dropbox:hover {
-    background: lightblue; /* when mouse over to the drop zone, change color */
-  }
-  
-  .dropbox p {
-    font-size: 1.2em;
+<!-- Application styling -->
+<style>
+  form {
+    display: block;
+    height: 100px;
+    width: 80%;
+    background: #999;
+    margin: auto;
+    margin-top: 40px;
     text-align: center;
-    padding: 50px 0;
+    line-height: 100px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    color: white;
+    font-weight: bold;
+  }
+
+  a.submit-button{
+    display: block;
+    margin: auto;
+    text-align: center;
+    width: 200px;
+    padding: 10px;
+    text-transform: uppercase;
+    background-color: #999;
+    color: white;
+    font-weight: bold;
+    margin-top: 20px;
+    border-radius: 4px;
+  }
+
+  .file-listing{
+    width: 400px;
+    margin: auto;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
   }
 </style>
