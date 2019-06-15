@@ -1,14 +1,20 @@
-  before_deploy: 
-    - cd dist
-  deploy:
-    provider: azure_web_apps
-    skip_cleanup: true
-    on: development
-    verbose: true
-  language: node_js
-  node_js: lts/*
+before_deploy:
+  - cd dist
+deploy:
+  provider: azure_web_apps
+  skip_cleanup: true
+  on: development
+  verbose: true
+language: node_js
+node_js: lts/*
 
-  jobs:
-    include:
-      script: 
-        - npm run build
+
+env:
+  global:
+    - FILE_TYPE = /^(image\/jpg|image\/jpeg|image\/png)$/
+    - VUE_APP_SAS_API = "https://ddfnapp.azurewebsites.net/v1/getSasToken"
+
+jobs:
+  include:
+    script:
+      - npm run build
