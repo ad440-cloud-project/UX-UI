@@ -11,7 +11,7 @@ node_js: lts/*
 
 env:
   global:
-    - FILE_TYPE = /^(image\/jpg|image\/jpeg|image\/png)$/
+    - FILE_TYPE = /^(image\/jpg|image\/jpeg|image\/png|application\/pdf)$/
     - VUE_APP_SAS_API = "https://ddfnapp.azurewebsites.net/v1/getSasToken"
 
 jobs:
