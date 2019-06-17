@@ -54,6 +54,10 @@ a.submit-button {
   margin-top: 20px;
 }
 
+a.submit-button.hover {
+  background-color: black;
+}
+
 progress {
   width: 400px;
   margin: auto;
@@ -62,7 +66,6 @@ progress {
   margin-bottom: 20px;
 }
 </style>
-
 
 <template>
   <div id="file-drag-drop">
@@ -73,15 +76,13 @@ progress {
       </div>
     </form>
     <progress max="100" :value.prop="uploadPercentage"></progress>
-
-    <div v-for="(file, key) in files" class="file-listing">
-      <img class="preview" v-bind:ref="'preview'+parseInt( key )">
+    <div v-for="(file, key) in files" v-bind:key="file.id" class="file-listing">
+      <img class="preview" v-bind:ref="'preview' + parseInt(key)"/>
       {{ file.name }}
       <div class="remove-container">
-        <a class="remove" v-on:click="removeFile( key )">Remove</a>
+        <a class="remove" v-on:click="removeFile(key)">Remove</a>
       </div>
     </div>
-
     <a class="submit-button" v-on:click="submitFiles()" v-show="files.length > 0">Submit</a>
   </div>
 </template>
@@ -262,7 +263,8 @@ export default {
     //Stores object data in session variables.
     getSasToken() {
       axios
-        .get("https://ddfnapp.azurewebsites.net/v1/getSasToken")
+      .get(process.env.VUE_APP_SAS_API)
+        //.get("https://ddfnapp.azurewebsites.net/v1/getSasToken")
         .then(response => {
           this.$session.set("sasToken", response.data.token);
           this.$session.set("uri", response.data.uri);
