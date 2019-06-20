@@ -70,7 +70,7 @@ progress {
 <template>
   <div id="file-drag-drop">
     <form ref="fileform">
-      <h1>Upload images</h1>
+      <h1>Upload Photos</h1>
       <div class="dropbox">
         <p>Drag your file(s) here to begin</p>
       </div>
